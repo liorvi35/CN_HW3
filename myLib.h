@@ -14,11 +14,11 @@
 #include <sys/time.h>
 
 /* constants */
-#define CONNECTION_PORT 5060
+#define CONNECTION_PORT 5894
 #define SERVER_IP "127.0.0.1"
-#define ID_Lior 1763 
-#define ID_Yoad 1818
-#define XOR_ID 505
-#define BUFFER_SIZE 1024
+#define ID_Lior 0000011011100011 
+#define ID_Yoad 0000011100011010
+#define XOR_ID 0000000111111001
+#define BUFFER_SIZE 10
 #define MAX_CONNECTIONS 3
 #define ERR -1
