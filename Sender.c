@@ -14,6 +14,7 @@ int main()
     long size = ftell(f);
     rewind(f);
     char *b = malloc(size);
+    //need to change how we read the file
     if(b == NULL)
     {
         perror("failed to allocate memory");
