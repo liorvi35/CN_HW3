@@ -5,6 +5,8 @@ int main()
     /* (1) reading the file */
     long size = 0;
     FILE *f = fopen("msg.txt", "r");
+    update-receiver
+    if(f == NULL) // checking if the file exists
     if(f == NULL) // checking if file opened
     {
         fclose(f);
@@ -27,6 +29,14 @@ int main()
         close(clientSocket);
         perror("socket() failed");
         exit(errno);
+
+    }
+    printf("Success: socket is created!\n");
+    
+    // making struct be in big endian & converting ip address from text to binary form
+    struct sockaddr_in serverAddress;
+    memset(&serverAddress, 0, sizeof(serverAddress));
+    serverAddress.sin_family = AF_INET;
     }
     printf("Success: socket is created!\n");
     // checking if port is free to use:
@@ -41,6 +51,7 @@ int main()
     // making struct be in big endian & converting ip address to binary
     struct sockaddr_in serverAddress = {0};
     memset(&serverAddress, 0, sizeof(serverAddress));
+
     serverAddress.sin_port = htons(CONNECTION_PORT);                                             
     int rval = inet_pton(AF_INET, (const char *)SERVER_IP, &serverAddress.sin_addr);
     if (rval == ERR)
@@ -50,7 +61,6 @@ int main()
         perror("inet_pton() failed");
         exit(ERR);
     }
-    // making connection: 
     int connectResult = connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
     if (connectResult == ERR)
     {
@@ -75,6 +85,21 @@ int main()
     printf("Success: first half of file has been sent!\n");
 
     /* (4) checking for authintication */
+    // Receive data from server
+    char auth[BUFFER_SIZE] = {'\0'};
+    int bytesReceived = recv(clientSocket, auth, BUFFER_SIZE, 0);
+    if (bytesReceived == -1) {
+        fclose(f);
+        close(clientSocket);
+        perror("recv() failed");
+        exit(ERR);
+    } else if (bytesReceived == 0) {
+        fclose(f);
+        close(clientSocket);
+        perror("peer has closed the TCP connection prior to recv().\n");
+        exit(ERR);
+    } else {
+        if(auth != XOR_ID) // checking if uthintication code match
     int auth = 0;
     recv(clientSocket, &auth, sizeof(int), 0);
     if(auth != XOR_ID) // checking if uthintication code match
@@ -85,7 +110,7 @@ int main()
         exit(ERR);
     }
     printf("Success: authintication code match!\n");
-
+    
     /* (5) change the CC algorithm */
     char *CC = "reno";
     if(setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC, strlen(CC)) == ERR)
@@ -113,14 +138,24 @@ int main()
     d = getchar();
     if(d == 'y')
     {
-        //ask tuvia
-        if(setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC, strlen(CC)) == -1)
+        char *CC2 = "cubic"; 
+        if(setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC2, strlen(CC2)) == -1)
         {
             fclose(f);
             close(clientSocket);
             perror("setsockop() failed");
             exit(errno);
         }
+
+        char *msg = "continue";
+        if(send(clientSocket, msg, strlen(msg), 0) == -1)
+        {
+            fclose(f);
+            close(clientSocket);
+            perror("send() failed");
+            exit(errno);
+        }
+
         printf("Success: repeting process!\n");
         goto REPEAT;
     }
