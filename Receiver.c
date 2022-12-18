@@ -152,6 +152,7 @@ int main()
 
     }
 
+
     /* (10) if getting exit message */ 
     int avg = 0;
     for(int i=0; i<size*10; i++ ){
