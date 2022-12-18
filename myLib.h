@@ -14,7 +14,7 @@
 #include <sys/time.h>
 
 /* constants */
-#define CONNECTION_PORT 5060 
+#define CONNECTION_PORT 5060
 #define SERVER_IP "127.0.0.1"
 #define ID_Lior 1763 
 #define ID_Yoad 1818
