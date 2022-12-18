@@ -38,7 +38,7 @@ int main()
         exit(errno);
     }
     printf("Success: port is usable!\n");
-    // ?
+    // making struct be in big endian & converting ip address to binary
     struct sockaddr_in serverAddress = {0};
     memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_port = htons(CONNECTION_PORT);                                             
