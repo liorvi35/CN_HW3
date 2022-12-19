@@ -98,10 +98,7 @@ int main()
         perror("peer has closed the TCP connection prior to recv().\n");
         exit(ERR);
     } else {
-        if(auth != XOR_ID) // checking if uthintication code match
-    int auth = 0;
-    recv(clientSocket, &auth, sizeof(int), 0);
-    if(auth != XOR_ID) // checking if uthintication code match
+        if(strcmp(auth , XOR_ID)) // checking if uthintication code match
     {
         fclose(f);
         close(clientSocket);
@@ -112,7 +109,8 @@ int main()
     
     /* (5) change the CC algorithm */
     char *CC = "reno";
-    if(setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC, strlen(CC)) == ERR)
+    int change = setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC, strlen(CC));
+    if(change == ERR)
     {
         fclose(f);
         close(clientSocket);
@@ -122,7 +120,8 @@ int main()
     printf("Success: CC has been changed!\n");
 
     /* (6) sending the second part of the file */
-    if(send(clientSocket, f + halfFIle, size - halfFIle, 0) == -1)
+    int sendp2 = send(clientSocket, f + halfFIle, size - halfFIle, 0);
+    if(sendp2 == -1)
     {
         fclose(f);
         close(clientSocket);
@@ -133,12 +132,13 @@ int main()
 
     /* (7) user decision */
     char d = '\0';
-    printf("send the file again? y/n");
+    printf("send the file again? y/n\n");
     d = getchar();
     if(d == 'y')
     {
         char *CC2 = "cubic"; 
-        if(setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC2, strlen(CC2)) == -1)
+        change = setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC2, strlen(CC2));
+        if(change == -1)
         {
             fclose(f);
             close(clientSocket);
