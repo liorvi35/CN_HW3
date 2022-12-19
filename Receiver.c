@@ -2,7 +2,8 @@
 
 int main()
 {
-    int* timesave = malloc(10*sizeof(int));
+    // for saving the time 
+    int* timesave = malloc(2*sizeof(int));
     int size = 2;
 
     /* (1) creating a TCP connection between the sender and receiver */
@@ -24,8 +25,7 @@ int main()
     printf("Success: port is usable!\n");
 
     /* (2) getting connection from the sender */
-    // "sockaddr_in" is the "derived" from sockaddr structure
-    // used for IPv4 communication.
+    // create a struct
     struct sockaddr_in serverAddress;
     memset(&serverAddress, 0, sizeof(serverAddress));
 
@@ -43,8 +43,7 @@ int main()
     }
     printf("Bind() success\n");
 
-    // Make the socket listening; actually mother of all client sockets.
-    // 500 is a Maximum size of queue connection requests
+    // Make the socket listening
     // number of concurrent connections
     int listenResult = listen(serverSocket, 3);
     if (listenResult == -1) {
@@ -61,25 +60,40 @@ int main()
     socklen_t clientAddressLen = sizeof(clientAddress);
 
     int rec = 0; // how much part of the file im already received
-    int files = 0; 
+    int files = 0; //how much files i receive
 
     while (1) {
-        struct timeval current_time;
+        printf("Start loop\n");
+        struct timeval current_time; // save the current time
         int curtime = gettimeofday(&current_time, NULL);
 
         memset(&clientAddress, 0, sizeof(clientAddress));
         clientAddressLen = sizeof(clientAddress);
         int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
         if (clientSocket == -1) {
-            perror("listen failed");
-            // close the sockets
-            close(serverSocket);
-            exit(errno);
+              perror("listen failed");
+                // close the sockets
+                close(serverSocket);
+                exit(errno);
         }
-        printf("A new client connection accepted\n");
 
-       /* (10) if getting exit message */ 
+        printf("A new client connection accepted\n");
+        /*
+            memset(&clientAddress, 0, sizeof(clientAddress));
+            clientAddressLen = sizeof(clientAddress);
+            int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
+            if (clientSocket == -1) {
+                perror("listen failed");
+                // close the sockets
+                close(serverSocket);
+                exit(errno);
+            }
+            printf("A new client connection accepted\n");
+        */
+
+        /* (10) if getting exit message */ 
         if(rec >= 2){ // i receive all the file
+            printf("%d\n" , rec);
             char buffer[BUFFER_SIZE] = {'\0'};
             if(recv(serverSocket, buffer, sizeof(buffer), 0) == -1)
             {
@@ -94,32 +108,43 @@ int main()
             }
             else{ // need to get a new file
                 rec = 0; 
-                continue;
                 files++;
+                continue;
             }
         }
 
         /* (3) reveiving the first part 
         or
        (7) receiving the second part */
+        char buffer[BUFFER_SIZE];
+        memset(buffer, 0, BUFFER_SIZE);
+        int bytesReceived = recv(clientSocket, buffer, BUFFER_SIZE, 0);
+        if (bytesReceived == -1) {
+            perror("error occurred2");
+            // close the sockets
+            close(serverSocket);
+            close(clientSocket);
+            exit(ERR);
+        }
+       /*
         if(recv(serverSocket, NULL, 0, 0) == -1)
         {
-            perror("error occurred");
+            perror("error occurred2");
             close(serverSocket);
-            xit(ERR);
+            exit(ERR);
         }
-
+        */
 
         /* (4) measuring the time it took to receive the first part + (5) saving the time 
          or   
          (8) measuring the time it took to receive the second part + (9) saving times */
         int aftertime = gettimeofday(&current_time, NULL);
-        int time = curtime - aftertime;
-        if(files > 4){
-            timesave = realloc(timesave , size*sizeof(int) + 10 * sizeof(int));
+        int time = aftertime - curtime;
+        if(rec==0 && files>1){
+            timesave = realloc(timesave , size*sizeof(int) + 2 * sizeof(int));
             size++;
         }
-        timesave[files] = time;
+        timesave[files + rec] = time;
 
         if(rec == 0){
             printf("Success: first half of file has been receive!\n");
@@ -148,17 +173,18 @@ int main()
                 printf("authentication was successfully sent.\n");
             }
         }
+        printf("End loop\n");
 
     }
 
 
     /* (10) if getting exit message */ 
     int avg = 0;
-    for(int i=0; i<size*10; i++ ){
+    for(int i=0; i<size*2; i++ ){
         printf("the time of the %d part is%d\n" , i , timesave[i]);
         avg+= timesave[i];
     }
-    avg /= (size*10);
+    avg /= (size*2);
    
     return 0;
 }
