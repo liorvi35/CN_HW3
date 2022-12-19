@@ -19,7 +19,6 @@ int main()
     size = ftell(f);
     rewind(f);
 
-
     /* (2) creating a TCP connection between the sender and receiver */
     // creating socket:
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
