@@ -5,15 +5,14 @@ int main()
     /* (1) reading the file */
     long size = 0;
     FILE *f = fopen("msg.txt", "r");
-    update-receiver
     if(f == NULL) // checking if the file exists
-    if(f == NULL) // checking if file opened
     {
         fclose(f);
         perror("fopen() failed");
         exit(errno);
     }
     printf("Success: file is opened!\n");
+
     // getting the size in bytes of the file:
     fseek(f, SEEK_SET, SEEK_END);
     size = ftell(f);
@@ -28,7 +27,6 @@ int main()
         close(clientSocket);
         perror("socket() failed");
         exit(errno);
-
     }
     printf("Success: socket is created!\n");
     
@@ -36,21 +34,6 @@ int main()
     struct sockaddr_in serverAddress;
     memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
-    }
-    printf("Success: socket is created!\n");
-    // checking if port is free to use:
-    int enableReuse = 1;
-    int ret = setsockopt(listeningSocket, SOL_SOCKET, SO_REUSEADDR, &enableReuse, sizeof(int));
-    if (ret == ERR) 
-    {
-        perror("setsockopt() failed");
-        exit(errno);
-    }
-    printf("Success: port is usable!\n");
-    // making struct be in big endian & converting ip address to binary
-    struct sockaddr_in serverAddress = {0};
-    memset(&serverAddress, 0, sizeof(serverAddress));
-
     serverAddress.sin_port = htons(CONNECTION_PORT);                                             
     int rval = inet_pton(AF_INET, (const char *)SERVER_IP, &serverAddress.sin_addr);
     if (rval == ERR)
@@ -60,6 +43,8 @@ int main()
         perror("inet_pton() failed");
         exit(ERR);
     }
+
+    // make a connection: 
     int connectResult = connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
     if (connectResult == ERR)
     {
@@ -106,7 +91,9 @@ int main()
         exit(ERR);
     }
     printf("Success: authintication code match!\n");
-    
+
+    }
+
     /* (5) change the CC algorithm */
     char *CC = "reno";
     int change = setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC, strlen(CC));
@@ -136,8 +123,13 @@ int main()
     d = getchar();
     if(d == 'y')
     {
-        char *CC2 = "cubic"; 
-        change = setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC2, strlen(CC2));
+        if(strcmp(CC , "reno")) {
+            CC = "cubic"; 
+        }
+        else{
+            CC = "reno"; 
+        }
+        change = setsockopt(clientSocket, IPPROTO_TCP, TCP_CONGESTION, CC, strlen(CC));
         if(change == -1)
         {
             fclose(f);
@@ -145,7 +137,7 @@ int main()
             perror("setsockop() failed");
             exit(errno);
         }
-
+        
         char *msg = "continue";
         if(send(clientSocket, msg, strlen(msg), 0) == -1)
         {
@@ -154,7 +146,6 @@ int main()
             perror("send() failed");
             exit(errno);
         }
-
         printf("Success: repeting process!\n");
         goto REPEAT;
     }
