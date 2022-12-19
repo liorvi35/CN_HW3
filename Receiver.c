@@ -78,18 +78,6 @@ int main()
         }
 
         printf("A new client connection accepted\n");
-        /*
-            memset(&clientAddress, 0, sizeof(clientAddress));
-            clientAddressLen = sizeof(clientAddress);
-            int clientSocket = accept(serverSocket, (struct sockaddr *)&clientAddress, &clientAddressLen);
-            if (clientSocket == -1) {
-                perror("listen failed");
-                // close the sockets
-                close(serverSocket);
-                exit(errno);
-            }
-            printf("A new client connection accepted\n");
-        */
 
         /* (10) if getting exit message */ 
         if(rec >= 2){ // i receive all the file
@@ -126,14 +114,6 @@ int main()
             close(clientSocket);
             exit(ERR);
         }
-       /*
-        if(recv(serverSocket, NULL, 0, 0) == -1)
-        {
-            perror("error occurred2");
-            close(serverSocket);
-            exit(ERR);
-        }
-        */
 
         /* (4) measuring the time it took to receive the first part + (5) saving the time 
          or   
