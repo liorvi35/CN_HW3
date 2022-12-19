@@ -5,7 +5,6 @@ int main()
     int* timesave = malloc(10*sizeof(int));
     int size = 2;
 
-
     /* (1) creating a TCP connection between the sender and receiver */
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket == -1)
