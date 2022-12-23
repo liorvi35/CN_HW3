@@ -25,7 +25,7 @@ int main()
     size_t size = 0, half = 0, bytesSent = 0, size1 = 0, size2 = 0;   
     struct sockaddr_in addr;
     memset(&addr, '\0', sizeof(addr));
-    char buffer[BUFSIZE] = {'\0'}, d = '\0', *CC = NULL , *partA =NULL,*partB = NULL;   
+    char buffer[BUFSIZE] = {'\0'}, d = '\0', *CC = NULL, *partA =NULL, *partB = NULL;   
     int sock = 0 ;
     double loss = 0.0;
 
@@ -73,7 +73,7 @@ int main()
     addr.sin_port = htons(PORT);
     addr.sin_addr.s_addr = inet_addr(IP);
 
-    if(connect(sock, (struct sockaddr*)&addr, sizeof(addr)) <= 0) // checking if could connect to server
+    if(connect(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) // checking if could connect to server
     {
         perror("connect() failed");
         close(sock);
@@ -208,8 +208,8 @@ int main()
         printf("authentication match!\n");
 
         /* (5) changing CC algorithm */
-        CC = (strcmp(CC, "reno") ? "cubic" : "reno"); // determinating congestion control algorithm
-        if(setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, &CC, sizeof(CC)) < 0) //changing congestion control algorithm
+        CC = (strcmp(CC, "reno") == 0 ? "cubic" : "reno"); // determinating congestion control algorithm
+        if(setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, CC, sizeof(CC)) < 0) //changing congestion control algorithm
         {
             perror("setsockopt() failed");
             close(sock);
@@ -217,7 +217,7 @@ int main()
             free(partB);
             exit(errno);
         }
-        printf("CC algorithm has been changed to: %s!\n" , CC);
+        printf("CC algorithm has been changed to: \"%s\"\n", CC);
 
         /* (6) sending the second part */
         bytesSent = send(sock, partB , size2, 0); // send the second part
@@ -239,7 +239,7 @@ int main()
         } 
         else if (bytesSent < size2) 
         {
-            loss = (bytesSent / siez2) * 100.0;
+            loss = (bytesSent / size2) * 100.0;
             printf("could sent only %ld bytes from the required %ld bytes.\nlost %.2f %%bytes.", bytesSent, size2, loss);
         }
         else
@@ -283,8 +283,8 @@ int main()
         else // (7-a-i) user chose to send file again
         {
             /* (7-a-ii) changing back the CC algrithm */
-            CC = (strcmp(CC, "reno") ? "cubic" : "reno"); // determinating congestion control algorithm
-            if(setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, &CC, sizeof(CC)) < 0) //changing congestion control algorithm
+            CC = (strcmp(CC, "reno") == 0 ? "cubic" : "reno"); // determinating congestion control algorithm
+            if(setsockopt(sock, IPPROTO_TCP, TCP_CONGESTION, CC, sizeof(CC)) < 0) //changing congestion control algorithm
             {
                 perror("setsockopt() failed");
                 close(sock);
@@ -292,7 +292,7 @@ int main()
                 free(partB);
                 exit(errno);
             }
-            printf("CC algorithm has been changed to: %s!\n" , CC);
+            printf("CC algorithm has been changed to: \"%s\"\n", CC);
             goto REPEAT; // (7-a-iii) repeating process
         }
 
