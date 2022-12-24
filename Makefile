@@ -16,11 +16,11 @@ Sender: Sender.o
 	$(CC) $(FLAGS) -o Sender Sender.o  
 
 # (compilation) making object files from '.c' and '.h' files: 
-Receiver.o: Receiver.c myLib.h
-	$(CC) $(FLAGS) -c Receiver.c myLib.h
+Receiver.o: Receiver.c myHeader.h
+	$(CC) $(FLAGS) -c Receiver.c myHeader.h
 
-Sender.o: Sender.c myLib.h
-	$(CC) $(FLAGS) -c Sender.c myLib.h
+Sender.o: Sender.c myHeader.h
+	$(CC) $(FLAGS) -c Sender.c myHeader.h
 
 # delete all files that created after 'make' command (not deleting '.c' files)
 clean:
