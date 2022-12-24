@@ -24,4 +24,4 @@ Sender.o: Sender.c myLib.h
 
 # delete all files that created after 'make' command (not deleting '.c' files)
 clean:
-	rm -f *.o *.out *.gch *.h.gch Receiver Sender
+	rm -f *.o *.h.gch Receiver Sender
