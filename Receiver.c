@@ -28,6 +28,7 @@ int main()
         (21) size_t sizePart1: the size of part 1
         (22) size_t sizePart2:  the size of part 2
         (23) size_t sum: sum of bytes in each receive
+        (24) size_t total: the total of the byte that received
     */
 
     /* declaring and reseting variables */
@@ -42,8 +43,8 @@ int main()
     memset(&start, 0, sizeof(start));
     memset(&start, 0, sizeof(end));
     memset(&start, 0, sizeof(calc));
-    size_t byteRecv = 0, sizepart1 = 0, sizepart2 = 0, sum = 0;
-    int *timeArray = malloc(sizeTime * sizeof(int));
+    size_t byteRecv = 0, sizepart1 = 0, sizepart2 = 0, sum = 0, total = 0;
+    double *timeArray = (double*)malloc(sizeTime * sizeof(double));
     if(timeArray == NULL) // checkig if memmory allocated
     {
         perror("malloc() failed");
@@ -58,7 +59,7 @@ int main()
     {
         perror("socket() failed");
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     }
     printf("socket created!\n");
@@ -67,7 +68,7 @@ int main()
     {
         perror("setsockopt() failed");
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     }
 
@@ -79,7 +80,7 @@ int main()
     {
         perror("bind() failed");
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     }
     printf("socket bound!\n");
@@ -88,7 +89,7 @@ int main()
     {
         perror("listen() failed");
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     } 
     printf("waiting for connection...\n");
@@ -101,7 +102,7 @@ int main()
         perror("bind() failed");
         close(client_sock);
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     }
     printf("sender connected!\n");
@@ -114,7 +115,7 @@ int main()
         perror("send() failed");
         close(client_sock);
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     }
     else if(byteRecv == 0)
@@ -122,7 +123,7 @@ int main()
         printf("peer has closed the TCP connection prior to send()\n");
         close(client_sock);
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(EXIT_FAILURE);
     }
 
@@ -132,7 +133,7 @@ int main()
         perror("send() failed");
         close(client_sock);
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(errno);
     }
     else if(byteRecv == 0)
@@ -140,7 +141,7 @@ int main()
         printf("peer has closed the TCP connection prior to send()\n");
         close(client_sock);
         close(server_sock);
-        free(timeArray)
+        free(timeArray);
         exit(EXIT_FAILURE);
     }
 
@@ -153,7 +154,7 @@ int main()
             perror("send() failed");
             close(client_sock);
             close(server_sock);
-            free(timeArray)
+            free(timeArray);
             exit(errno);
         }
         else if(byteRecv == 0)
@@ -161,7 +162,7 @@ int main()
             printf("peer has closed the TCP connection prior to send()\n");
             close(client_sock);
             close(server_sock);
-            free(timeArray)
+            free(timeArray);
             exit(EXIT_FAILURE);
         }
 
@@ -186,7 +187,7 @@ int main()
                 {
                     avg2 += timeArray[i];
                 }
-                printf("time to receive part %d of file %d is %d [us]\n", (i % 2 == 0 ? 1 : 2), pf, timeArray[i]);
+                printf("time to receive part %d of file %d is %f [ms]\n", (i % 2 == 0 ? 1 : 2), pf, timeArray[i]);
             }
 
                 printf("\n");
@@ -196,8 +197,8 @@ int main()
                 avg1 /= (file - 1);
                 avg2 /= (file - 1);
                 /* (10-iii) printing the average times */
-                printf("the average of sending first file - by \"cubic\" - is: %.3f [us]\n", avg1);
-                printf("the average of sending second file - by \"reno\" - is: %.3f [us]\n", avg2);
+                printf("the average of sending first file - by \"cubic\" - is: %.3f [ms]\n", avg1);
+                printf("the average of sending second file - by \"reno\" - is: %.3f [ms]\n", avg2);
                 printf("\n");
                 printf("###################\n");
             break;
@@ -208,7 +209,7 @@ int main()
             perror("send() failed");
             close(client_sock);
             close(server_sock);
-            free(timeArray)
+            free(timeArray);
             exit(errno);
         }
 
@@ -226,7 +227,7 @@ int main()
                 perror("send() failed");
                 close(client_sock);
                 close(server_sock);
-                free(timeArray)
+                free(timeArray);
                 exit(errno);
             }
             else if(byteRecv == 0)
@@ -234,19 +235,28 @@ int main()
                 printf("peer has closed the TCP connection prior to send()\n");
                 close(client_sock);
                 close(server_sock);
-                free(timeArray)
+                free(timeArray);
                 exit(EXIT_FAILURE);
             }
             sum += byteRecv;
         }
         gettimeofday(&end, NULL); // get end time
-        printf("first message has been received!\n");
+        total+= sum;
+        if(sum < sizepart1)
+        {
+            printf("the receiver only received %ld of %ld bytes of the first part" , sum , sizepart1);
+        }
+        else
+        {
+            printf("first message has been received!\n");    
+        }
+        
 
         /* (4) measuring the time */
         timersub(&end, &start, &calc); // calculate the diffrence
 
         /* (5) saving the time */
-        timeArray[last] = ((calc.tv_sec * 1000000.0) + calc.tv_usec); //save the time in micro-seconds
+        timeArray[last] = (((calc.tv_sec * 1000000.0) + calc.tv_usec)/1000.0); //save the time in mili-seconds
         last++;
 
         /* (6) sending back the authentication */
@@ -255,7 +265,7 @@ int main()
             perror("send() failed");
             close(client_sock);
             close(server_sock);
-            free(timeArray)
+            free(timeArray);
             exit(errno);
         }
         else
@@ -270,7 +280,7 @@ int main()
             perror("setsockopt() failed");
             close(client_sock);
             close(server_sock);
-            free(timeArray)
+            free(timeArray);
             exit(errno);
         }
         printf("CC algorithm has been changed to: \"%s\"\n", CC);
@@ -290,7 +300,7 @@ int main()
                 perror("send() failed");
                 close(client_sock);
                 close(server_sock);
-                free(timeArray)
+                free(timeArray);
                 exit(errno);
             }
             else if(byteRecv == 0)
@@ -298,23 +308,37 @@ int main()
                 printf("peer has closed the TCP connection prior to send()\n");
                 close(client_sock);
                 close(server_sock);
-                free(timeArray)
+                free(timeArray);
                 exit(EXIT_FAILURE);
             }
             sum += byteRecv;
         }
         gettimeofday(&end, NULL);
-        printf("second message has been received!\n");
+        total+= sum;
+        if(sum < sizepart1)
+        {
+            printf("the receiver only received %ld of %ld bytes of the second part" , sum , sizepart2);
+        }
+        else
+        {
+            printf("second message has been received!\n");    
+        }
 
         /* (8) measuring the time */
         timersub(&end, &start, &calc);
 
         /* (9) saving the time*/
-        timeArray[last] = ((calc.tv_sec * 1000000.0) + calc.tv_usec); // set the end time 
+        timeArray[last] = (((calc.tv_sec * 1000000.0) + calc.tv_usec)/1000.0); // set the end time 
         last++;
         file++;
         sizeTime = 2 * file;
-        timeArray = (int*)realloc(timeArray, sizeTime * sizeof(int));
+        timeArray = (double*)realloc(timeArray, sizeTime * sizeof(double));
+
+        if(total < sizepart1 + sizepart2)
+        {
+            printf("the receiver only received %ld of %ld bytes of the total file", total, sizepart1 + sizepart2);
+        }
+        
 
         CC = (strcmp(CC, "reno") == 0 ? "cubic" : "reno"); // determinating congestion control algorithm
         if(setsockopt(client_sock, IPPROTO_TCP, TCP_CONGESTION, CC, sizeof(CC)) < 0) //changing congestion control algorithm for sync
@@ -322,7 +346,7 @@ int main()
             perror("setsockopt() failed");
             close(client_sock);
             close(server_sock);
-            free(timeArray)
+            free(timeArray);
             exit(errno);
         }
         printf("CC algorithm has been changed to: \"%s\"\n", CC);
@@ -332,7 +356,7 @@ int main()
     // closing connection
     close(client_sock); // freeing recourses and closing socket
     close(server_sock);
-    free(timeArray)
+    free(timeArray);
 
     exit(EXIT_SUCCESS);
 }
