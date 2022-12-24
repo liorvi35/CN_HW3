@@ -167,7 +167,7 @@ int main()
         }
 
         /* (10) if received exit message */
-        else if(strcmp(buffer, "exit") == 0)
+        else if(strcmp(buffer, EXIT) == 0)
         {
             printf("exit message has been received!\n");
             printf("\n\n");
