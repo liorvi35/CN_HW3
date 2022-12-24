@@ -19,4 +19,5 @@
 #define BUFSIZE 8192 // size of the buffer
 #define AUTH "0000000111111001" // authentication code
 #define OK "ok" // ready message
+#define EXIT "exit"
 #define CONNECTIONS 50 // number of clients that server can listen simultaneously
