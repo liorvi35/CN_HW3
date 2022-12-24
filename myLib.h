@@ -13,13 +13,10 @@
 #include <time.h>
 #include <sys/time.h>
 
-/* constants */
-#define CONNECTION_PORT 5894
-#define SERVER_IP "127.0.0.1"
-#define ID_Lior 0000011011100011 
-#define ID_Yoad 0000011100011010
-#define XOR_ID "0000000111111001"
-#define BUFFER_SIZE 1024
-#define MAX_CONNECTIONS 3
-#define ERR -1
-
+/* defining constants */
+#define IP "127.0.0.1" // server's ip address
+#define PORT 8395 // connection port
+#define BUFSIZE 8192 // size of the buffer
+#define AUTH "0000000111111001" // authentication code
+#define OK "ok" // ready message
+#define CONNECTIONS 50 // number of clients that server can listen simultaneously
