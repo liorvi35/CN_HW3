@@ -1,4 +1,4 @@
-#include "myLib.h" // including our library
+#include "myHeader.h" // including our library
 
 int main()
 {
