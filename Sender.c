@@ -34,7 +34,6 @@ int main()
     if(file == NULL) // checking if file exists
     {
         perror("fopen() failed");
-        close(sock);
         exit(errno);
     }
     printf("file opened!\n");
