@@ -256,7 +256,7 @@ int main()
         }
         if(d == 'n') // (7-b-i) user chose to exit
         {   /* (7-b-ii) sending exit message */
-            bytesSent = send(sock, EXIT, strlen("exit") + 1, 0); // send an exit message to the receiver
+            bytesSent = send(sock, EXIT, strlen(EXIT) + 1, 0); // send an exit message to the receiver
             if(bytesSent < 0)
             {
                 perror("send() failed");
